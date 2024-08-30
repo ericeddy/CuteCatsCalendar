@@ -9,7 +9,7 @@ Features:
  - Local Caching via SDWebImage
 
 
-Next Steps:
+(possible) Next Steps:
  - Touch cell to expand cell to image height
  - Navigation Header for TableView, would include current week, forward nav, backward nav, and gotoDate nav
  - Improvements to Image generation & caching approach
