@@ -17,6 +17,7 @@ class CatCalendarCell: UITableViewCell {
         img.backgroundColor = UIColor.background
         return img
     }()
+    // Making 2 labels to layer them to both avoid and make use of the attributed string issue with rendering strokes
     let monthLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-CondensedBlack", size: 24.0)
@@ -33,6 +34,7 @@ class CatCalendarCell: UITableViewCell {
         label.textAlignment = .right
         return label
     }()
+    // Making 2 labels to layer them to both avoid and make use of the attributed string issue with rendering strokes
     let dateLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "HelveticaNeue-CondensedBlack", size: 140.0)
@@ -121,21 +123,19 @@ class CatCalendarCell: UITableViewCell {
         dateLabel2.text = date.string
         
         let color: UIColor = isToday ? .white.withAlphaComponent(0.6) : .white.withAlphaComponent(0.4)
-        monthLabel2.textColor = isToday ? .black.withAlphaComponent(0.8) : color
+        monthLabel2.textColor = color
         dateLabel2.textColor = color
     }
     func updateImagePosition(_ offsetY: CGFloat) {
-        print("updateImagePosition:\(offsetY)")
         let imgH = self.catBackground.image?.size.height ?? 0
         let cellH = self.bounds.height
         let windowH = (window?.windowScene?.screen.bounds.height ?? 800) + cellH
         let diff = max((cellH - imgH), -50)
-//        let offsetPercent = 1 - ((offsetY - (frame.origin.y)) / windowH )
+        
         let positionOnScreen = frame.origin.y - offsetY + cellH
         let factor = max(min((1 - (positionOnScreen / windowH)), 1.0), 0.0)
         let easing = -(cos(.pi * factor) - 1) / 2;
         
-//        print("\(diff) \(offsetY) \(positionOnScreen) \(factor)")
         img_topAnchor.constant = imgH == 0 ? 0 : diff * easing
 //        if positionOnScreen > windowH {
 //            img_topAnchor.constant = 0

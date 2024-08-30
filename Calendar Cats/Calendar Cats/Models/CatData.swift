@@ -23,7 +23,7 @@ struct CatData: Codable {
         df.dateFormat = "EEEE MMM"
         let string = df.string(from: date).uppercased()
         let isToday = date == Calendar.current.startOfDay(for: Date())
-        let attr:[NSAttributedString.Key: Any] = [.strokeColor: UIColor.black.withAlphaComponent(0.2), .foregroundColor: UIColor.white, .strokeWidth: 4]
+        let attr:[NSAttributedString.Key: Any] = [.strokeColor: isToday ?  UIColor.black.withAlphaComponent(0.8) : UIColor.black.withAlphaComponent(0.2), .foregroundColor: UIColor.white, .strokeWidth: 5]
         return NSMutableAttributedString(string: string, attributes: attr)
         
     }
@@ -33,7 +33,7 @@ struct CatData: Codable {
         let string = df.string(from: date)
         
         let isToday = date == Calendar.current.startOfDay(for: Date())
-        let attr:[NSAttributedString.Key: Any] = [.strokeColor: isToday ? UIColor.black : UIColor.black.withAlphaComponent(0.15), .foregroundColor: UIColor.white, .strokeWidth: 2]
+        let attr:[NSAttributedString.Key: Any] = [.strokeColor: isToday ? UIColor.black.withAlphaComponent(0.8) : UIColor.black.withAlphaComponent(0.15), .foregroundColor: UIColor.white, .strokeWidth: 2]
         return NSMutableAttributedString(string: string, attributes: attr)
     }
 }

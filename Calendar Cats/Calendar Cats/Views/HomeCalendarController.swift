@@ -15,6 +15,7 @@ class HomeCalendarController: UIViewController {
     let loader = UIActivityIndicatorView(style: .large)
     var tableRowAnimationOut: UITableView.RowAnimation = .left
     var tableRowAnimationIn: UITableView.RowAnimation = .left
+    var swipeLock = true
     
     
     var cancellables = Set<AnyCancellable>()
@@ -56,7 +57,6 @@ class HomeCalendarController: UIViewController {
         
         catCalVM.$catsData.sink { cats in
             DispatchQueue.main.async {
-                print("catsSet")
                 let oldPaths: [IndexPath] = self.calendarView.indexPathsForVisibleRows ?? []
                 let paths = [IndexPath(row: 0, section: 0),
                              IndexPath(row: 1, section: 0),
@@ -77,6 +77,7 @@ class HomeCalendarController: UIViewController {
                 
                 if cats.count > 0 {
                     self.loader.stopAnimating()
+                    self.swipeLock = false
                 } else {
                     self.loader.startAnimating()
                 }
@@ -85,7 +86,6 @@ class HomeCalendarController: UIViewController {
         
         catCalVM.$offsetY.sink { offsetY in
             DispatchQueue.main.async {
-                print("tablescrolled")
                 for cell in self.calendarView.visibleCells as! [CatCalendarCell] {
                     cell.updateImagePosition(offsetY)
                 }
@@ -96,17 +96,19 @@ class HomeCalendarController: UIViewController {
 
     }
     @objc func leftSwiped() {
+        if swipeLock { return }
         catCalVM.gotoNextPage()
         tableRowAnimationOut = .left
         tableRowAnimationIn = .right
-        
+        swipeLock = true
     }
 
     @objc func rightSwiped() {
+        if swipeLock { return }
         catCalVM.gotoPrevPage()
-        
         tableRowAnimationOut = .right
         tableRowAnimationIn = .left
+        swipeLock = true
     }
 }
 
