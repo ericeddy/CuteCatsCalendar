@@ -1,0 +1,11 @@
+//
+//  APIConfig.xcconfig
+//  Calendar Cats
+//
+//  Created by Eric Eddy on 2024-08-29.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+CAT_KEY = live_nXpCpqLUtG3A2n0CExDpYdqB9mhII12qfI0pEVrpRMnn4m0nEcWq7ljFlI32lapy
