@@ -58,6 +58,8 @@ class CatCalendarCell: UITableViewCell {
         return view
     }()
     var img_topAnchor: NSLayoutConstraint!
+    var imgHeight: CGFloat = 0.0
+    var catSelected = false
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -103,6 +105,7 @@ class CatCalendarCell: UITableViewCell {
         _ = containerView.bottomAnchor.constraint(equalTo:   contentView.bottomAnchor).isActive = true
         _ = containerView.leadingAnchor.constraint(equalTo:  contentView.leadingAnchor).isActive = true
         _ = containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        
     }
     func setData(_ catData: CatData, _ offsetY: CGFloat) {
         let isToday = catData.date == Calendar.current.startOfDay(for: Date())
@@ -110,6 +113,7 @@ class CatCalendarCell: UITableViewCell {
             catBackground.sd_setImage(with: URL(string: catData.cat.url)) { [weak self] image, error, _, _ in
                 guard let strongSelf = self else { return }
                 let img = image?.resizeTopAlignedToFill(newWidth: strongSelf.contentView.frame.width, minHeight: strongSelf.frame.height)
+                CatCalendarViewModel.imageHeights[catData.date.timeIntervalSince1970] = img?.size.height ?? 0.0
                 strongSelf.catBackground.image = img
                 strongSelf.updateImagePosition(offsetY)
             }
@@ -136,7 +140,17 @@ class CatCalendarCell: UITableViewCell {
         let factor = max(min((1 - (positionOnScreen / windowH)), 1.0), 0.0)
         let easing = -(cos(.pi * factor) - 1) / 2;
         
-        img_topAnchor.constant = imgH == 0 ? 0 : diff * easing
+        let oldConstant = img_topAnchor.constant
+        img_topAnchor.constant = isSelected ? 0 : imgH == 0 ? 0 : diff * easing
+        let d = img_topAnchor.constant - oldConstant
+        if d > 3.5 || d < -3.5 {
+            UIView.animate(withDuration:  0.25) {
+                self.layoutIfNeeded()
+            }
+        } else {
+            self.layoutIfNeeded()
+        }
+        
 //        if positionOnScreen > windowH {
 //            img_topAnchor.constant = 0
 //        } else if positionOnScreen < 0 {

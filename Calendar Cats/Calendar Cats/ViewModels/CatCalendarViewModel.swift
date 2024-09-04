@@ -10,10 +10,15 @@ import Combine
 import UIKit
 
 class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UITableViewDataSource {
+    static var cellHeight: CGFloat = 0.0
+    static var imageHeights: Dictionary<TimeInterval, CGFloat> = Dictionary() // date int - img height
     let catService = CatService()
     @Published var catsData = [CatData]()
     @Published var offsetY = 0.0
     var pageCount = Calendar.current.component(.weekOfYear, from: Date())
+    var selectedIndex = -1
+    var tapLock = false
+    
     
     override init() {
         super.init()
@@ -34,10 +39,12 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
     }
     func gotoNextPage() {
         catsData = []
+        selectedIndex = -1
         goToPage(pageCount + 1)
     }
     func gotoPrevPage() {
         catsData = []
+        selectedIndex = -1
         goToPage(pageCount - 1)
     }
     
@@ -66,10 +73,27 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
         cell.isUserInteractionEnabled = false
         return cell
     }
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        floor((tableView.window?.screen.bounds.height ?? 375 ) / 3.5)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tapLock {
+            tableView.deselectRow(at: indexPath, animated: false)
+            return
+        }
+        selectedIndex = indexPath.row == selectedIndex ? -1 : indexPath.row
+        offsetY = tableView.contentOffset.y
+        
+        tableView.beginUpdates()
+        tableView.endUpdates()
     }
-    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let date = catsData[indexPath.row].date.timeIntervalSince1970
+        return indexPath.row == selectedIndex ? Self.imageHeights[date] ?? Self.cellHeight : Self.cellHeight
+    }
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        tapLock = true
+    }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        tapLock = false
+    }
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         offsetY = scrollView.contentOffset.y
     }

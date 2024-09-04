@@ -18,6 +18,7 @@ struct CatResponseData: Codable {
 struct CatData: Codable {
     var cat: CatResponseData
     var date: Date = Date()
+    var isSelected = false
     func getMonth() -> NSMutableAttributedString {
         let df = DateFormatter()
         df.dateFormat = "EEEE MMM"

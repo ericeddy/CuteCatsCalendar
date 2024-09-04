@@ -11,17 +11,15 @@ import Combine
 class HomeCalendarController: UIViewController {
     let catCalVM = CatCalendarViewModel()
     let calendarView = CatCalendarView()
-    let cs = CatService()
     let loader = UIActivityIndicatorView(style: .large)
     var tableRowAnimationOut: UITableView.RowAnimation = .left
     var tableRowAnimationIn: UITableView.RowAnimation = .left
     var swipeLock = true
     
-    
     var cancellables = Set<AnyCancellable>()
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        CatCalendarViewModel.cellHeight = floor((view.window?.screen.bounds.height ?? 800 ) / 3.5)
         loader.layer.cornerRadius = 8
         loader.backgroundColor = .white.withAlphaComponent(0.5)
         loader.hidesWhenStopped = true
@@ -31,7 +29,8 @@ class HomeCalendarController: UIViewController {
         calendarView.backgroundColor = UIColor.background
         calendarView.delegate = catCalVM
         calendarView.dataSource = catCalVM
-        
+        calendarView.allowsSelection = true
+        calendarView.allowsMultipleSelection = false
         calendarView.register(CatCalendarCell.self, forCellReuseIdentifier: "CatCalendarCell")
         view.addSubview(calendarView)
         view.addSubview(loader)
@@ -43,6 +42,10 @@ class HomeCalendarController: UIViewController {
         let rightGesture = UISwipeGestureRecognizer(target: self, action: #selector(rightSwiped))
         rightGesture.direction = .right
         calendarView.addGestureRecognizer(rightGesture)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(checkCellTapped))
+        tapGesture.numberOfTapsRequired = 1
+        calendarView.addGestureRecognizer(tapGesture)
         
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         loader.translatesAutoresizingMaskIntoConstraints = false
@@ -92,23 +95,32 @@ class HomeCalendarController: UIViewController {
             }
         }.store(in: &cancellables)
         
-        
-
     }
     @objc func leftSwiped() {
         if swipeLock { return }
-        catCalVM.gotoNextPage()
         tableRowAnimationOut = .left
         tableRowAnimationIn = .right
         swipeLock = true
+        
+        catCalVM.gotoNextPage()
     }
 
     @objc func rightSwiped() {
         if swipeLock { return }
-        catCalVM.gotoPrevPage()
         tableRowAnimationOut = .right
         tableRowAnimationIn = .left
         swipeLock = true
+        
+        catCalVM.gotoPrevPage()
+    }
+    @objc func checkCellTapped(sender: UITapGestureRecognizer? = nil ) {
+        let touched = sender?.location(ofTouch: 0, in: calendarView)
+        if let touchPoint = touched, let indexPath = calendarView.indexPathForRow(at: touchPoint) {
+            DispatchQueue.main.async {
+                self.calendarView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                self.calendarView.delegate?.tableView!(self.calendarView, didSelectRowAt: indexPath)
+            }
+        }
     }
 }
 

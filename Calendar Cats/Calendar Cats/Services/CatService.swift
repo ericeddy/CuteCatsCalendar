@@ -9,14 +9,14 @@ import Foundation
 import Network
 
 class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
+    
     func getCats(search: String, _ page: Int, _ limit: Int) async throws -> [CatData] {
         let cats = try await request([CatResponseData].self, router: .getCats(search: "", page, limit))
         return wrapCats(cats, page)
     }
     func getDates(_ page: Int) -> [Date] {
         var dates: [Date] = []
-        let calendar = Calendar.current // FIX THIS //
-        
+        let calendar = Calendar.current 
         guard let today = calendar.date(bySetting: .weekOfYear, value: page, of:  calendar.startOfDay(for:Date())) else {
             print("bad date via weekOfYear")
             return [Date()]
@@ -29,6 +29,7 @@ class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
         dates = range.compactMap { calendar.date(byAdding: .day, value: $0 - dayOfWeek, to: today) }
         return dates
     }
+    
     func wrapCats(_ cats:[CatResponseData], _ page: Int) -> [CatData] {
         var wrappedCats: [CatData] = []
         var i = 0
