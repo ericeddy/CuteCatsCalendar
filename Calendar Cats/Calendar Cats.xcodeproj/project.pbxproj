@@ -15,6 +15,7 @@
 		4170146D2C7FDCD30086F6D4 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 4170146C2C7FDCD30086F6D4 /* SDWebImage */; };
 		4170146F2C7FDD320086F6D4 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170146E2C7FDD320086F6D4 /* APIService.swift */; };
 		417014712C7FE6480086F6D4 /* CatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417014702C7FE6480086F6D4 /* CatService.swift */; };
+		418B87952C89022800613198 /* CalendarHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418B87942C89022800613198 /* CalendarHeaderView.swift */; };
 		4193B3562C8107B300183151 /* CatCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4193B3552C8107B300183151 /* CatCalendarView.swift */; };
 		4193B3582C810B0F00183151 /* CatCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4193B3572C810B0F00183151 /* CatCalendarViewModel.swift */; };
 		4193B35A2C81213600183151 /* CatCalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4193B3592C81213600183151 /* CatCalendarCell.swift */; };
@@ -32,6 +33,7 @@
 		4170146E2C7FDD320086F6D4 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		417014702C7FE6480086F6D4 /* CatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatService.swift; sourceTree = "<group>"; };
 		417014722C80DB210086F6D4 /* APIConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = APIConfig.xcconfig; sourceTree = "<group>"; };
+		418B87942C89022800613198 /* CalendarHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHeaderView.swift; sourceTree = "<group>"; };
 		4193B3552C8107B300183151 /* CatCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatCalendarView.swift; sourceTree = "<group>"; };
 		4193B3572C810B0F00183151 /* CatCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatCalendarViewModel.swift; sourceTree = "<group>"; };
 		4193B3592C81213600183151 /* CatCalendarCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatCalendarCell.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 			children = (
 				417014522C7FB8120086F6D4 /* HomeCalendarController.swift */,
 				4193B3552C8107B300183151 /* CatCalendarView.swift */,
+				418B87942C89022800613198 /* CalendarHeaderView.swift */,
 				4193B3592C81213600183151 /* CatCalendarCell.swift */,
 			);
 			path = Views;
@@ -206,6 +209,7 @@
 				417014532C7FB8120086F6D4 /* HomeCalendarController.swift in Sources */,
 				4170146F2C7FDD320086F6D4 /* APIService.swift in Sources */,
 				4193B3582C810B0F00183151 /* CatCalendarViewModel.swift in Sources */,
+				418B87952C89022800613198 /* CalendarHeaderView.swift in Sources */,
 				4170144F2C7FB8120086F6D4 /* AppDelegate.swift in Sources */,
 				4193B3562C8107B300183151 /* CatCalendarView.swift in Sources */,
 				4193B35C2C817D2200183151 /* UIImage+Extensions.swift in Sources */,

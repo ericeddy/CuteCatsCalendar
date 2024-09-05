@@ -10,32 +10,41 @@ import Network
 
 class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
     
-    func getCats(search: String, _ page: Int, _ limit: Int) async throws -> [CatData] {
-        let cats = try await request([CatResponseData].self, router: .getCats(search: "", page, limit))
-        return wrapCats(cats, page)
+    func getCats(_ beginningOfWeekDate: Date) async throws -> [CatData] {
+        let cats = try await request([CatResponseData].self, router: .getCats(beginningOfWeekDate))
+        return wrapCats(cats, beginningOfWeekDate)
     }
-    func getDates(_ page: Int) -> [Date] {
+                                     
+//    func getCats(search: String, _ page: Int, _ year: Int, _ limit: Int) async throws -> [CatData] {
+//        let cats = try await request([CatResponseData].self, router: .getCats(search: "", page, limit))
+//        return wrapCats(cats, page, year)
+//    }
+                                     
+    func getDates(_ date: Date) -> [Date] {
         var dates: [Date] = []
         let calendar = Calendar.current 
-        guard let today = calendar.date(bySetting: .weekOfYear, value: page, of:  calendar.startOfDay(for:Date())) else {
-            print("bad date via weekOfYear")
-            return [Date()]
-        }
-        let dayOfWeek = calendar.component(.weekday, from: today)
-        guard let range = calendar.range(of: .weekday, in: .weekOfYear, for: today) else {
+        
+//        guard let todayYearBad = calendar.date(bySetting: .weekOfYear, value: page, of:  calendar.startOfDay(for:Date())),
+//         let today = calendar.date(bySetting: .year, value: year, of: todayYearBad) else {
+//            print("bad date via weekOfYear")
+//            return [Date()]
+//        }
+        let dayOfWeek = calendar.component(.weekday, from: date)
+        guard let range = calendar.range(of: .weekday, in: .weekOfYear, for: date) else {
             print("bad date ranges")
             return [Date()]
         }
-        dates = range.compactMap { calendar.date(byAdding: .day, value: $0 - dayOfWeek, to: today) }
+        dates = range.compactMap { calendar.date(byAdding: .day, value: $0 - dayOfWeek, to: date) }
+        print(dates)
         return dates
     }
     
-    func wrapCats(_ cats:[CatResponseData], _ page: Int) -> [CatData] {
+    func wrapCats(_ cats:[CatResponseData], _ date: Date) -> [CatData] {
         var wrappedCats: [CatData] = []
         var i = 0
-        let dates = getDates(page)
+        let dates = getDates(date)
         for cat in cats {
-        wrappedCats.append(CatData(cat: cat, date: dates[i]))
+            wrappedCats.append(CatData(cat: cat, date: dates[i]))
             i = i + 1
         }
         return wrappedCats
@@ -43,11 +52,13 @@ class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
 }
 
 protocol CatWranglingProtocol {
-    func getCats(search: String, _ page: Int, _ limit: Int) async throws -> [CatData]
+    func getCats(_ beginningOfWeekDate: Date) async throws -> [CatData]
+//    func getCats(search: String, _ page: Int, _ year: Int, _ limit: Int) async throws -> [CatData]
 }
 
 enum CatWranglingRequest: APIServiceRequest {
-    case getCats(search: String, _ page: Int, _ limit: Int)
+    case getCats(_ beginningOfWeekDate: Date)
+//    case getCats(search: String, _ page: Int, _ limit: Int)
     
     var config: any APIServiceConfig {
         CatConfig()
@@ -65,8 +76,9 @@ enum CatWranglingRequest: APIServiceRequest {
     }
     var composedURL: String {
         switch self {
-        case .getCats(_, let page, let limit):
-            return "\(config.baseURL)\(endpoint)?\(config.getParams(page, limit))"
+        case .getCats(let date):
+            let page = Calendar.current.component(.weekOfYear, from: date)
+            return "\(config.baseURL)\(endpoint)?\(config.getParams(page, 7))"
         }
         
     }

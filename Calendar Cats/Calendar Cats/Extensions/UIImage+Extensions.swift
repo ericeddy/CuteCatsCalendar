@@ -26,3 +26,14 @@ extension UIImage {
         return newImage
     }
 }
+
+extension UIButton {
+    func simulateClick() {
+        let initialColor = self.tintColor
+        self.tintColor = .gray
+        UIView.animate(withDuration: 0.2) {
+            self.tintColor = initialColor
+        }
+        
+    }
+}

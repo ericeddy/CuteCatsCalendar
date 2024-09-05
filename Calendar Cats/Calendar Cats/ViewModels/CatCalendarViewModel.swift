@@ -10,12 +10,16 @@ import Combine
 import UIKit
 
 class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UITableViewDataSource {
+    static var safeTop: CGFloat = 0.0
+    static var safeBot: CGFloat = 0.0
     static var cellHeight: CGFloat = 0.0
     static var imageHeights: Dictionary<TimeInterval, CGFloat> = Dictionary() // date int - img height
     let catService = CatService()
     @Published var catsData = [CatData]()
     @Published var offsetY = 0.0
-    var pageCount = Calendar.current.component(.weekOfYear, from: Date())
+    @Published var datesTitle = ""
+    var currentDatesRange: [Date] = []
+    var beginningOfWeekDate: Date! = Calendar.current.date(byAdding: .day, value: -(Calendar.current.component(.weekday, from: Date()) - 1), to: Calendar.current.startOfDay(for:Date()))
     var selectedIndex = -1
     var tapLock = false
     
@@ -27,8 +31,10 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
         }
     }
     func wrangleCats(_ attempt: Int = 0) async {
+        updateDateTitle()
         do {
-            catsData = try await catService.getCats(search: "", pageCount, 7)
+            catsData = try await catService.getCats(beginningOfWeekDate)
+            currentDatesRange = getDates()
         } catch let error {
             print("CatError: \(error)")
             if attempt < 4, let e = error as? NetworkError, case NetworkError.dataConversionFailure = e {
@@ -37,27 +43,56 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
             }
         }
     }
-    func gotoNextPage() {
+    func updateDateTitle() {
+        let df = DateFormatter()
+        df.dateFormat = "MMM dd"
+        let dates = getDates()
+        guard let firstDate = dates.first,
+                let lastDate = dates.last else { return }
+        datesTitle = "\( df.string(from: firstDate) ) - \( df.string(from: lastDate) )"
+    }
+    func gotoNextPage() -> Bool {
+        guard let d = Calendar.current.date(byAdding: .day, value: 7, to: beginningOfWeekDate) else { return false }
         catsData = []
         selectedIndex = -1
-        goToPage(pageCount + 1)
+        goToPage(d)
+        return true
     }
-    func gotoPrevPage() {
+    func gotoPrevPage() -> Bool {
+        guard let d = Calendar.current.date(byAdding: .day, value: -7, to: beginningOfWeekDate) else { return false }
         catsData = []
         selectedIndex = -1
-        goToPage(pageCount - 1)
+        goToPage(d)
+        return true
     }
-    
-    func goToPage(_ page: Int) {
-        pageCount = page
-        if page > 51 {
-            pageCount = 51
-        } else if page < 0 {
-            pageCount = 0
+    func gotoToday() -> Bool {
+        let d = Calendar.current.date(byAdding: .day, value: -(Calendar.current.component(.weekday, from: Date()) - 1), to: Calendar.current.startOfDay(for:Date()))
+        if let d = d, d.compare(beginningOfWeekDate) != .orderedSame {
+            catsData = []
+            selectedIndex = -1
+            goToPage(d)
+            return true
         }
+        return false
+    }
+    func gotoDate(_ date: Date) -> Bool {
+        let d = Calendar.current.date(byAdding: .day, value: -(Calendar.current.component(.weekday, from: date) - 1), to: Calendar.current.startOfDay(for:date))
+        if let d = d, d.compare(beginningOfWeekDate) != .orderedSame {
+            catsData = []
+            selectedIndex = -1
+            goToPage(d)
+            return true
+        }
+        return false
+    }
+    func goToPage(_ date: Date) {
+        beginningOfWeekDate = date
         Task {
             await self.wrangleCats()
         }
+    }
+    func getDates() -> [Date] {
+        catService.getDates(beginningOfWeekDate)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -90,6 +125,11 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
     }
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         tapLock = true
+    }
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            tapLock = false
+        }
     }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         tapLock = false
