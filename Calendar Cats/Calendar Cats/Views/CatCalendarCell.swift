@@ -113,7 +113,7 @@ class CatCalendarCell: UITableViewCell {
             catBackground.sd_setImage(with: URL(string: catData.cat.url)) { [weak self] image, error, _, _ in
                 guard let strongSelf = self else { return }
                 let img = image?.resizeTopAlignedToFill(newWidth: strongSelf.contentView.frame.width, minHeight: strongSelf.frame.height)
-                CatCalendarViewModel.imageHeights[catData.date.timeIntervalSince1970] = img?.size.height ?? 0.0
+                CatCalendarViewModel.imageHeights[catData.date.timeIntervalSince1970] = img?.size.height ?? CatCalendarViewModel.cellHeight
                 strongSelf.catBackground.image = img
                 strongSelf.updateImagePosition(offsetY)
             }
@@ -131,7 +131,7 @@ class CatCalendarCell: UITableViewCell {
         dateLabel2.textColor = color
     }
     func updateImagePosition(_ offsetY: CGFloat) {
-        let imgH = self.catBackground.image?.size.height ?? 0
+        let imgH = self.catBackground.image?.size.height ?? CatCalendarViewModel.cellHeight
         let cellH = self.bounds.height
         let windowH = (window?.windowScene?.screen.bounds.height ?? 800) + cellH
         let diff = max((cellH - imgH), -50)

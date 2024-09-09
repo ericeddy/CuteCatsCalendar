@@ -9,33 +9,32 @@ import Foundation
 import Network
 
 class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
+    static let shared = CatService()
     
-    func getCats(_ beginningOfWeekDate: Date) async throws -> [CatData] {
-        let cats = try await request([CatResponseData].self, router: .getCats(beginningOfWeekDate))
-        return wrapCats(cats, beginningOfWeekDate)
+    func getCats(_ beginningOfWeekDate: Date) async -> [CatData] {
+        do {
+            let cats = try await request([CatResponseData].self, router: .getCats(beginningOfWeekDate))
+            return wrapCats(cats, beginningOfWeekDate)
+        } catch {
+            return wrapCats(self.getOfflineCats(), beginningOfWeekDate)
+        }
     }
-                                     
-//    func getCats(search: String, _ page: Int, _ year: Int, _ limit: Int) async throws -> [CatData] {
-//        let cats = try await request([CatResponseData].self, router: .getCats(search: "", page, limit))
-//        return wrapCats(cats, page, year)
-//    }
-                                     
+    
+    func getOfflineCats() -> [CatResponseData] {
+        return [CatResponseData(), CatResponseData(), CatResponseData(), CatResponseData(), CatResponseData(), CatResponseData(), CatResponseData()]
+    }
+    
     func getDates(_ date: Date) -> [Date] {
         var dates: [Date] = []
         let calendar = Calendar.current 
         
-//        guard let todayYearBad = calendar.date(bySetting: .weekOfYear, value: page, of:  calendar.startOfDay(for:Date())),
-//         let today = calendar.date(bySetting: .year, value: year, of: todayYearBad) else {
-//            print("bad date via weekOfYear")
-//            return [Date()]
-//        }
         let dayOfWeek = calendar.component(.weekday, from: date)
         guard let range = calendar.range(of: .weekday, in: .weekOfYear, for: date) else {
             print("bad date ranges")
             return [Date()]
         }
         dates = range.compactMap { calendar.date(byAdding: .day, value: $0 - dayOfWeek, to: date) }
-        print(dates)
+//        print(dates)
         return dates
     }
     
@@ -52,13 +51,11 @@ class CatService: APIService<CatWranglingRequest>, CatWranglingProtocol {
 }
 
 protocol CatWranglingProtocol {
-    func getCats(_ beginningOfWeekDate: Date) async throws -> [CatData]
-//    func getCats(search: String, _ page: Int, _ year: Int, _ limit: Int) async throws -> [CatData]
+    func getCats(_ beginningOfWeekDate: Date) async -> [CatData]
 }
 
 enum CatWranglingRequest: APIServiceRequest {
     case getCats(_ beginningOfWeekDate: Date)
-//    case getCats(search: String, _ page: Int, _ limit: Int)
     
     var config: any APIServiceConfig {
         CatConfig()

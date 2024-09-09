@@ -14,7 +14,7 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
     static var safeBot: CGFloat = 0.0
     static var cellHeight: CGFloat = 0.0
     static var imageHeights: Dictionary<TimeInterval, CGFloat> = Dictionary() // date int - img height
-    let catService = CatService()
+    @Published var catService = CatService.shared
     @Published var catsData = [CatData]()
     @Published var offsetY = 0.0
     @Published var datesTitle = ""
@@ -23,25 +23,36 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
     var selectedIndex = -1
     var tapLock = false
     
-    
+    var cancellables = Set<AnyCancellable>()
     override init() {
         super.init()
         Task {
             await self.wrangleCats()
         }
+//        catService.$internetAvailable.sink { available in
+//            print("internetAvailable: \(available)")
+//            if available {
+//                DispatchQueue.main.async {
+//                    self.checkForUnloadedCats()
+//                }
+//            }
+//        }.store(in: &cancellables)
+        
+    }
+    func checkForUnloadedCats() {
+        for cat in catsData {
+            if cat.cat.needsLoading {
+                Task {
+                    await self.wrangleCats()
+                }
+                return
+            }
+        }
     }
     func wrangleCats(_ attempt: Int = 0) async {
         updateDateTitle()
-        do {
-            catsData = try await catService.getCats(beginningOfWeekDate)
-            currentDatesRange = getDates()
-        } catch let error {
-            print("CatError: \(error)")
-            if attempt < 4, let e = error as? NetworkError, case NetworkError.dataConversionFailure = e {
-                print("Try Again")
-                await wrangleCats(attempt + 1)
-            }
-        }
+        catsData = await catService.getCats(beginningOfWeekDate)
+        currentDatesRange = getDates()
     }
     func updateDateTitle() {
         let df = DateFormatter()
@@ -93,6 +104,9 @@ class CatCalendarViewModel: NSObject, ObservableObject, UITableViewDelegate, UIT
     }
     func getDates() -> [Date] {
         catService.getDates(beginningOfWeekDate)
+    }
+    func startNetworkMonitoring() {
+        
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

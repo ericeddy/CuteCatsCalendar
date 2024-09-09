@@ -6,19 +6,20 @@
 //
 
 import Foundation
+import Network
 
-class APIService<Router: APIServiceRequest> {
+class APIService<Router: APIServiceRequest>: NSObject, ObservableObject {
     private let urlSession: URLSession
     
     init(urlSession: URLSession = URLSession.shared) {
         self.urlSession = urlSession
+        super.init()
     }
-
+        
     private func handleResponse(data: Data, response: URLResponse) throws {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse
         }
-        
         guard (200...299).contains(httpResponse.statusCode) else {
             throw NetworkError.requestFailed(statusCode: httpResponse.statusCode)
         }
@@ -32,12 +33,17 @@ class APIService<Router: APIServiceRequest> {
             try handleResponse(data: data, response: response)
             
             let decoder = JSONDecoder()
-        
             let decodedData = try decoder.decode(returnType, from: data)
 //            print("DecodedData", decodedData)
             return decodedData
-        } catch {
-            throw NetworkError.dataConversionFailure
+        } catch let error {
+            let err: NSError = error as NSError
+            switch err.code {
+            case NSURLErrorTimedOut, NSURLErrorNotConnectedToInternet:
+                throw NetworkError.offline
+            default:
+                throw NetworkError.dataConversionFailure
+            }
         }
     }
 }
@@ -70,6 +76,7 @@ protocol APIServiceConfig {
 }
 
 enum NetworkError: Error {
+    case offline
     case invalidURL
     case requestFailed(statusCode: Int)
     case invalidResponse

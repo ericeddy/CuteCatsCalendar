@@ -139,6 +139,7 @@ class HomeCalendarController: UIViewController, HomeControllerProtocol {
         calendarView.setTableHeaderView(headerView: headerView)
         headerView.updateTop()
         pckr_heightAnchor.constant = 0 //this lets the calendar draw once at 330 before hiding it so that first display renders better
+        calendarView.contentOffset = .init(x: 0, y: -CatCalendarViewModel.safeTop)
         catCalVM.scrollViewDidScroll(calendarView)
     }
     // go to next
